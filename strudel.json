@@ -1,5 +1,8 @@
 {
   "_base": "https://raw.githubusercontent.com/sudosilo/strudel-samples/main/",
+  "givemeyourpursenow": [
+    "yarn/givemeyourpursenow.mp3"
+  ],
   "heyyoudontknowme": [
     "yarn/heyyoudontknowme.mp3"
   ],
@@ -15,6 +18,12 @@
   "purse": [
     "yarn/purse.mp3"
   ],
+  "shutupgivemeyourpurse": [
+    "yarn/shutupgivemeyourpurse.mp3"
+  ],
+  "thatsmypurseidontknowyou": [
+    "yarn/thatsmypurseidontknowyou.mp3"
+  ],
   "yeahyoudontknowme": [
     "yarn/yeahyoudontknowme.mp3"
   ],
@@ -26,17 +35,5 @@
   ],
   "youpassbutter": [
     "yarn/youpassbutter.mp3"
-  ],
-  "bobbya": [
-    "yarn/bobbya.mp3"
-  ],
-  "bobbyc": [
-    "yarn/bobbyc.mp3"
-  ],
-  "bobbyd": [
-    "yarn/bobbyd.mp3"
-  ],
-  "bobbye": [
-    "yarn/bobbye.mp3"
   ]
 }
