@@ -67,6 +67,8 @@ while read -r name id; do
   case "$name" in \#*) continue ;; esac
   if [ -s "$OUT/$name.mp3" ]; then echo "have $name"; continue; fi
   echo "pulling $name"
+  title=$(curl -sL -A "$UA" -H "Accept: text/html" "https://getyarn.io/yarn-clip/$id" | grep -o '<title>[^<]*' | head -n 1 | sed 's/<title>//')
+  echo "$name | $id | $title" >> strudel-samples-v2-titles.log
   if fetch_mp4 "$id" "$TMP/$name.mp4"; then
     ffmpeg -loglevel error -y -i "$TMP/$name.mp4" -vn -ac 1 -ar 44100 -b:a 128k "$OUT/$name.mp3" && echo "saved $name"
   else
@@ -91,6 +93,6 @@ print("strudel.json now maps", ", ".join(k for k in data if k != "_base"))
 PY
 
 gh auth setup-git >/dev/null 2>&1
-git add yarn strudel.json "$LOG"
+git add yarn strudel.json "$LOG" strudel-samples-v2-titles.log
 git commit -m "Yarn clips pull run" >/dev/null 2>&1 && git push origin main
 echo "done"
