@@ -42,6 +42,9 @@ def norm(s):
     return " ".join(re.sub(r"[^a-z' ]+", " ", s.lower().replace("’", "'")).split())
 
 have = {f.rsplit("-", 1)[-1][:-4] for f in os.listdir(outdir) if f.endswith(".mp3")}
+dropfile = os.path.join(outdir, slug + "-dropped.txt")
+if os.path.exists(dropfile):
+    have |= {l.strip() for l in open(dropfile) if l.strip()}
 seen, kept = set(), len(have)
 q = phrase.replace(" ", "+")
 
@@ -50,7 +53,6 @@ for page in range(MAX_PAGES):
         break
     url = "https://getyarn.io/yarn-find?text=%s&p=%d" % (q, page)
     body = curl(url)
-    open(os.path.join(outdir, "%s-search-p%d.html" % (slug, page)), "w").write(body)
     ids = [i for i in dict.fromkeys(re.findall(r"yarn-clip/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})", body)) if i not in seen]
     print("page", page, "found", len(ids), "clips")
     if not ids:
@@ -106,11 +108,15 @@ for w in sorted(os.listdir("words")):
     files = sorted(f for f in os.listdir(os.path.join("words", w)) if f.endswith(".mp3"))
     if files:
         data[w] = ["words/%s/%s" % (w, f) for f in files]
+if os.path.isdir("supercuts"):
+    for f in sorted(os.listdir("supercuts")):
+        if f.endswith(".mp3"):
+            data[f[:-4]] = ["supercuts/" + f]
 json.dump(data, open("strudel.json", "w"), indent=2)
 print("strudel.json updated,", slug, "has", len(data.get(slug, [])), "clips")
 PY
 
 gh auth setup-git >/dev/null 2>&1
-git add words strudel.json
+git add words supercuts strudel.json
 git commit -m "Word pull: $PHRASE" >/dev/null 2>&1 && git push origin main
 echo "done"
