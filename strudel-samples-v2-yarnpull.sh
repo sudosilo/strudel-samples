@@ -44,7 +44,7 @@ try_curl () {
 
 fetch_mp4 () {
   local id="$1" dest="$2" host ref
-  for host in y.yarn.co y.getyarn.io; do
+  for host in y.getyarn.io y.yarn.co; do
     for ref in "https://getyarn.io/" "https://getyarn.io/yarn-clip/$id" "https://yarn.co/"; do
       rm -f "$dest"
       try_curl "https://$host/$id.mp4" "$dest" "$ref" && return 0
