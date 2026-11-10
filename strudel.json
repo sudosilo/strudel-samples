@@ -1,3 +1,15 @@
 {
-  "_base": "https://raw.githubusercontent.com/sudosilo/strudel-samples/main/"
+  "_base": "https://raw.githubusercontent.com/sudosilo/strudel-samples/main/",
+  "idontknowyou": [
+    "yarn/idontknowyou.mp3"
+  ],
+  "passthebutter": [
+    "yarn/passthebutter.mp3"
+  ],
+  "purse": [
+    "yarn/purse.mp3"
+  ],
+  "youpassbutter": [
+    "yarn/youpassbutter.mp3"
+  ]
 }
