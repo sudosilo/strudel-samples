@@ -9,25 +9,10 @@
   "purse": [
     "yarn/purse.mp3"
   ],
+  "youdontknowme": [
+    "yarn/youdontknowme.mp3"
+  ],
   "youpassbutter": [
     "yarn/youpassbutter.mp3"
-  ],
-  "youdontknowmea": [
-    "yarn/youdontknowmea.mp3"
-  ],
-  "youdontknowmeb": [
-    "yarn/youdontknowmeb.mp3"
-  ],
-  "youdontknowmec": [
-    "yarn/youdontknowmec.mp3"
-  ],
-  "youdontknowmed": [
-    "yarn/youdontknowmed.mp3"
-  ],
-  "youdontknowmee": [
-    "yarn/youdontknowmee.mp3"
-  ],
-  "youdontknowmef": [
-    "yarn/youdontknowmef.mp3"
   ]
 }
