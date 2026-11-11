@@ -1,98 +1,80 @@
 #!/data/data/com.termux/files/usr/bin/bash
-# strudel-samples yarn puller v2
-# Reads strudel-samples-v1-yarnclips.txt (name then yarn clip id, one clip per line),
-# downloads each clip with browser style requests, converts it to mp3,
-# rebuilds strudel.json, commits and pushes.
+# strudel-samples yarn clip puller v2
+# Reads strudel-samples-v1-yarnclips.txt (Strudel name, a space, then the yarn clip id),
+# downloads each new clip into yarn/ named <words said>_<show>_<episode>_<yarn id>.mp3,
+# records it in strudel-samples-v1-catalog.csv, rebuilds strudel.json, commits and pushes.
 
 set -u
 cd "$(dirname "$0")"
 
-LIST="strudel-samples-v1-yarnclips.txt"
-OUT="yarn"
-LOG="strudel-samples-v2-yarnpull.log"
-UA="Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36"
-mkdir -p "$OUT"
-: > "$LOG"
-
 for tool in curl ffmpeg python git; do
   command -v "$tool" >/dev/null 2>&1 || pkg install -y "$tool"
 done
-command -v yt-dlp >/dev/null 2>&1 || pip install -q yt-dlp >/dev/null 2>&1
-
-is_mp4 () {
-  [ -s "$1" ] && python -c "import sys;d=open(sys.argv[1],'rb').read(64);sys.exit(0 if b'ftyp' in d else 1)" "$1"
-}
-
-try_curl () {
-  local url="$1" dest="$2" ref="$3" code
-  code=$(curl -sL --compressed -o "$dest" -w "%{http_code}" \
-    -A "$UA" \
-    -H "Accept: */*" \
-    -H "Accept-Language: en-US,en;q=0.9" \
-    -H "Range: bytes=0-" \
-    -H "Referer: $ref" \
-    -H "Origin: https://getyarn.io" \
-    -H "Sec-Fetch-Dest: video" \
-    -H "Sec-Fetch-Mode: no-cors" \
-    -H "Sec-Fetch-Site: cross-site" \
-    -H "sec-ch-ua-mobile: ?1" \
-    -H "sec-ch-ua-platform: \"Android\"" \
-    "$url")
-  echo "curl $code $url" >> "$LOG"
-  is_mp4 "$dest"
-}
-
-fetch_mp4 () {
-  local id="$1" dest="$2" host ref
-  for host in y.getyarn.io y.yarn.co; do
-    for ref in "https://getyarn.io/" "https://getyarn.io/yarn-clip/$id" "https://yarn.co/"; do
-      rm -f "$dest"
-      try_curl "https://$host/$id.mp4" "$dest" "$ref" && return 0
-    done
-  done
-  if command -v yt-dlp >/dev/null 2>&1; then
-    for url in "https://y.yarn.co/$id.mp4" "https://getyarn.io/yarn-clip/$id" "https://yarn.co/yarn-clip/$id"; do
-      rm -f "$dest"
-      yt-dlp -q --no-warnings --referer "https://getyarn.io/" --user-agent "$UA" -o "$dest" "$url" >> "$LOG" 2>&1
-      echo "yt-dlp $url" >> "$LOG"
-      is_mp4 "$dest" && return 0
-    done
-  fi
-  return 1
-}
-
-TMP=$(mktemp -d)
-while read -r name id; do
-  [ -z "${name:-}" ] && continue
-  case "$name" in \#*) continue ;; esac
-  if [ -s "$OUT/$name.mp3" ]; then echo "have $name"; continue; fi
-  echo "pulling $name"
-  title=$(curl -sL -A "$UA" -H "Accept: text/html" "https://getyarn.io/yarn-clip/$id" | grep -o '<title>[^<]*' | head -n 1 | sed 's/<title>//')
-  echo "$name | $id | $title" >> strudel-samples-v2-titles.log
-  if fetch_mp4 "$id" "$TMP/$name.mp4"; then
-    ffmpeg -loglevel error -y -i "$TMP/$name.mp4" -vn -ac 1 -ar 44100 -b:a 128k "$OUT/$name.mp3" && echo "saved $name"
-  else
-    echo "FAILED $name"
-  fi
-done < "$LIST"
-rm -rf "$TMP"
 
 python - <<'PY'
-import json, os
-base = "https://raw.githubusercontent.com/sudosilo/strudel-samples/main/"
-try:
-    data = json.load(open("strudel.json"))
-except Exception:
-    data = {}
-data["_base"] = base
-for f in sorted(os.listdir("yarn")):
-    if f.endswith(".mp3"):
-        data[f[:-4]] = ["yarn/" + f]
-json.dump(data, open("strudel.json", "w"), indent=2)
-print("strudel.json now maps", ", ".join(k for k in data if k != "_base"))
+import html, importlib.util, os, re, subprocess, tempfile
+
+spec = importlib.util.spec_from_file_location("cat", "strudel-samples-v1-catalog.py")
+cat = importlib.util.module_from_spec(spec); spec.loader.exec_module(cat)
+
+UA = "Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36"
+os.makedirs("yarn", exist_ok=True)
+log = open("strudel-samples-v2-titles.log", "a", encoding="utf-8")
+
+def curl(url, dest=None, ref="https://getyarn.io/"):
+    args = ["curl", "-sL", "--compressed", "-A", UA,
+            "-H", "Accept-Language: en-US,en;q=0.9", "-H", "Referer: " + ref]
+    if dest:
+        subprocess.run(args + ["-H", "Range: bytes=0-", "-o", dest, url])
+        return None
+    return subprocess.run(args + ["-H", "Accept: text/html", url], capture_output=True).stdout.decode("utf-8", "replace")
+
+have = {r["strudel_name"] for r in cat.read()}
+added = []
+for line in open("strudel-samples-v1-yarnclips.txt"):
+    bits = line.split()
+    if len(bits) < 2 or bits[0].startswith("#"):
+        continue
+    name, cid = bits[0], bits[1]
+    if name in have:
+        print("have", name)
+        continue
+    print("pulling", name)
+    m = re.search(r"<title>([^<]*)", curl("https://getyarn.io/yarn-clip/" + cid))
+    parts = [p.strip() for p in html.unescape(m.group(1) if m else "").split("|")]
+    quote = parts[1] if len(parts) > 1 else name
+    full = parts[2] if len(parts) > 2 else ""
+    log.write("%s | %s | %s | %s\n" % (name, cid, quote, full))
+    tmp = tempfile.mktemp(suffix=".mp4")
+    good = False
+    for host in ("y.getyarn.io", "y.yarn.co"):
+        curl("https://%s/%s.mp4" % (host, cid), tmp, "https://getyarn.io/yarn-clip/" + cid)
+        if os.path.exists(tmp) and b"ftyp" in open(tmp, "rb").read(64):
+            good = True
+            break
+    if not good:
+        print("FAILED", name)
+        continue
+    show, year, ep, title = cat.parse_show(full)
+    words = re.sub(r"\(.*?\)", "", quote).strip(" -") or name
+    path = os.path.join("yarn", cat.file_name(words, show, ep, cid))
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", tmp, "-vn", "-ac", "1",
+                    "-ar", "44100", "-b:a", "128k", path])
+    os.remove(tmp)
+    cat.add(dict(file=path, strudel_name=name, kind="clip", words=words.lower(), quote=quote, show=show,
+                 year=year, episode=ep, episode_title=title, yarn_id=cid,
+                 yarn_url="https://getyarn.io/yarn-clip/" + cid, notes="untrimmed"))
+    added.append("%s (%s %s)" % (name, show, ep))
+    print("saved", path)
+
+log.close()
+cat.build_strudel_json()
+open(".strudel-samples-commit-msg", "w").write(
+    "Clip pull: added %d clips\n\n%s\n" % (len(added), "\n".join(added) or "none"))
 PY
 
 gh auth setup-git >/dev/null 2>&1
-git add yarn strudel.json "$LOG" strudel-samples-v2-titles.log
-git commit -m "Yarn clips pull run" >/dev/null 2>&1 && git push origin main
+git add yarn strudel.json strudel-samples-v1-catalog.csv strudel-samples-v2-titles.log
+git commit -F .strudel-samples-commit-msg >/dev/null 2>&1 && git push origin main
+rm -f .strudel-samples-commit-msg
 echo "done"

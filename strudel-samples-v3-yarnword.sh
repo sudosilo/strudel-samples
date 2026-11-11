@@ -2,8 +2,9 @@
 # strudel-samples yarn word puller v3
 # Usage: bash strudel-samples-v3-yarnword.sh hello
 # Searches getyarn for a word or short phrase, keeps the clips where the line is
-# basically just that phrase, saves each one as an mp3 in words/<phrase>/,
-# rebuilds strudel.json, commits and pushes.
+# basically just that phrase, saves each one in words/<phrase>/ named
+# <words>_<show>_<episode>_<yarn id>.mp3, records every clip in
+# strudel-samples-v1-catalog.csv, rebuilds strudel.json, commits and pushes.
 
 set -u
 cd "$(dirname "$0")"
@@ -14,13 +15,16 @@ for tool in curl ffmpeg python git; do
 done
 
 python - "$PHRASE" <<'PY'
-import html, json, os, re, subprocess, sys, tempfile
+import html, importlib.util, os, re, subprocess, sys, tempfile
+
+spec = importlib.util.spec_from_file_location("cat", "strudel-samples-v1-catalog.py")
+cat = importlib.util.module_from_spec(spec); spec.loader.exec_module(cat)
 
 phrase = sys.argv[1].strip().lower()
-slug = re.sub(r"[^a-z0-9]+", "", phrase) or "word"
-outdir = os.path.join("words", slug)
+name = re.sub(r"[^a-z0-9]+", "", phrase) or "word"
+outdir = os.path.join("words", name)
 os.makedirs(outdir, exist_ok=True)
-log = open(os.path.join(outdir, slug + "-titles.log"), "a")
+log = open(os.path.join(outdir, name + "-titles.log"), "a", encoding="utf-8")
 
 UA = "Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36"
 MAX_KEEP = 80
@@ -29,48 +33,43 @@ MAX_WORDS = len(phrase.split()) + 2
 
 def curl(url, dest=None, ref="https://getyarn.io/"):
     args = ["curl", "-sL", "--compressed", "-A", UA,
-            "-H", "Accept-Language: en-US,en;q=0.9",
-            "-H", "Referer: " + ref]
+            "-H", "Accept-Language: en-US,en;q=0.9", "-H", "Referer: " + ref]
     if dest:
-        args += ["-H", "Range: bytes=0-", "-o", dest, url]
-        subprocess.run(args)
+        subprocess.run(args + ["-H", "Range: bytes=0-", "-o", dest, url])
         return None
-    args += ["-H", "Accept: text/html", url]
-    return subprocess.run(args, capture_output=True).stdout.decode("utf-8", "replace")
+    return subprocess.run(args + ["-H", "Accept: text/html", url], capture_output=True).stdout.decode("utf-8", "replace")
 
 def norm(s):
-    return " ".join(re.sub(r"[^a-z' ]+", " ", s.lower().replace("’", "'")).split())
+    return " ".join(re.sub(r"[^a-z' ]+", " ", html.unescape(s).lower().replace("’", "'")).split())
 
-have = {f.rsplit("-", 1)[-1][:-4] for f in os.listdir(outdir) if f.endswith(".mp3")}
-dropfile = os.path.join(outdir, slug + "-dropped.txt")
+have = {r["yarn_id"][:8] for r in cat.read() if r["strudel_name"] == name}
+dropfile = os.path.join(outdir, name + "-dropped.txt")
 if os.path.exists(dropfile):
     have |= {l.strip() for l in open(dropfile) if l.strip()}
-seen, kept = set(), len(have)
+kept = len([r for r in cat.read() if r["strudel_name"] == name])
+added = []
+seen = set()
 q = phrase.replace(" ", "+")
 
 for page in range(MAX_PAGES):
     if kept >= MAX_KEEP:
         break
-    url = "https://getyarn.io/yarn-find?text=%s&p=%d" % (q, page)
-    body = curl(url)
+    body = curl("https://getyarn.io/yarn-find?text=%s&p=%d" % (q, page))
     ids = [i for i in dict.fromkeys(re.findall(r"yarn-clip/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})", body)) if i not in seen]
     print("page", page, "found", len(ids), "clips")
     if not ids:
         break
     for cid in ids:
         seen.add(cid)
-        short = cid[:8]
-        if short in have:
+        if cid[:8] in have:
             continue
-        page_html = curl("https://getyarn.io/yarn-clip/" + cid)
-        m = re.search(r"<title>([^<]*)", page_html)
-        title = html.unescape(m.group(1)) if m else ""
-        parts = [p.strip() for p in title.split("|")]
+        m = re.search(r"<title>([^<]*)", curl("https://getyarn.io/yarn-clip/" + cid))
+        parts = [p.strip() for p in html.unescape(m.group(1) if m else "").split("|")]
         quote = parts[1] if len(parts) > 1 else ""
-        show = parts[2] if len(parts) > 2 else ""
+        full = parts[2] if len(parts) > 2 else ""
         words = norm(quote).split()
         ok = phrase in norm(quote) and 0 < len(words) <= MAX_WORDS
-        log.write("%s | %s | %s | %s\n" % ("KEEP" if ok else "skip", cid, quote, show))
+        log.write("%s | %s | %s | %s\n" % ("KEEP" if ok else "skip", cid, quote, full))
         if not ok:
             continue
         tmp = tempfile.mktemp(suffix=".mp4")
@@ -81,42 +80,32 @@ for page in range(MAX_PAGES):
                 good = True
                 break
         if not good:
-            print("FAILED", short, quote)
+            print("FAILED", cid[:8], quote)
             continue
-        showslug = re.sub(r"[^a-z0-9]+", "", show.split("(")[0].lower())[:20] or "show"
-        mp3 = os.path.join(outdir, "%s-%s-%s.mp3" % (slug, showslug, short))
+        show, year, ep, title = cat.parse_show(full)
+        path = os.path.join(outdir, cat.file_name(phrase, show, ep, cid))
         subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", tmp, "-vn", "-ac", "1",
-                        "-ar", "44100", "-b:a", "128k", mp3])
+                        "-ar", "44100", "-b:a", "128k", path])
         os.remove(tmp)
+        cat.add(dict(file=path, strudel_name=name, kind="word", words=phrase, quote=quote, show=show,
+                     year=year, episode=ep, episode_title=title, yarn_id=cid,
+                     yarn_url="https://getyarn.io/yarn-clip/" + cid, notes="untrimmed"))
         kept += 1
-        print("saved", kept, show, "|", quote)
+        added.append(show)
+        print("saved", path)
         if kept >= MAX_KEEP:
             break
 
 log.close()
-
-base = "https://raw.githubusercontent.com/sudosilo/strudel-samples/main/"
-try:
-    data = json.load(open("strudel.json"))
-except Exception:
-    data = {}
-data["_base"] = base
-for f in sorted(os.listdir("yarn")):
-    if f.endswith(".mp3"):
-        data[f[:-4]] = ["yarn/" + f]
-for w in sorted(os.listdir("words")):
-    files = sorted(f for f in os.listdir(os.path.join("words", w)) if f.endswith(".mp3"))
-    if files:
-        data[w] = ["words/%s/%s" % (w, f) for f in files]
-if os.path.isdir("supercuts"):
-    for f in sorted(os.listdir("supercuts")):
-        if f.endswith(".mp3"):
-            data[f[:-4]] = ["supercuts/" + f]
-json.dump(data, open("strudel.json", "w"), indent=2)
-print("strudel.json updated,", slug, "has", len(data.get(slug, [])), "clips")
+cat.build_strudel_json()
+shows = sorted(set(added))
+open(".strudel-samples-commit-msg", "w").write(
+    "Word pull: %s, added %d clips\n\nShows: %s\n" % (phrase, len(added), ", ".join(shows) or "none"))
+print("catalog and strudel.json updated, added", len(added), "clips under", name)
 PY
 
 gh auth setup-git >/dev/null 2>&1
-git add words supercuts strudel.json
-git commit -m "Word pull: $PHRASE" >/dev/null 2>&1 && git push origin main
+git add words strudel.json strudel-samples-v1-catalog.csv
+git commit -F .strudel-samples-commit-msg >/dev/null 2>&1 && git push origin main
+rm -f .strudel-samples-commit-msg
 echo "done"

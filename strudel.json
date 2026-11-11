@@ -1,115 +1,115 @@
 {
   "_base": "https://raw.githubusercontent.com/sudosilo/strudel-samples/main/",
   "givemeyourpursenow": [
-    "yarn/givemeyourpursenow.mp3"
-  ],
-  "heyyoudontknowme": [
-    "yarn/heyyoudontknowme.mp3"
-  ],
-  "heyyoudontknowmeidontknowyou": [
-    "yarn/heyyoudontknowmeidontknowyou.mp3"
-  ],
-  "idontknowyou": [
-    "yarn/idontknowyou.mp3"
-  ],
-  "passthebutter": [
-    "yarn/passthebutter.mp3"
-  ],
-  "purse": [
-    "yarn/purse.mp3"
-  ],
-  "shutupgivemeyourpurse": [
-    "yarn/shutupgivemeyourpurse.mp3"
-  ],
-  "thatsmypurseidontknowyou": [
-    "yarn/thatsmypurseidontknowyou.mp3"
-  ],
-  "yeahyoudontknowme": [
-    "yarn/yeahyoudontknowme.mp3"
-  ],
-  "youdontknowmeall": [
-    "yarn/youdontknowmeall.mp3"
-  ],
-  "youdontknowmecalm": [
-    "yarn/youdontknowmecalm.mp3"
-  ],
-  "youpassbutter": [
-    "yarn/youpassbutter.mp3"
+    "yarn/give-me-your-purse-now_king-of-the-hill_s06e01_3a908a5e.mp3"
   ],
   "hello": [
-    "words/hello/hello-afteryang-56486619.mp3",
-    "words/hello/hello-bettercallsaul-602a5931.mp3",
-    "words/hello/hello-bettercallsaul-6e5532d9.mp3",
-    "words/hello/hello-bettercallsaul-8ff0450a.mp3",
-    "words/hello/hello-greysanatomy-17b2359b.mp3",
-    "words/hello/hello-greysanatomy-1872bb50.mp3",
-    "words/hello/hello-greysanatomy-1ebc301b.mp3",
-    "words/hello/hello-greysanatomy-22d92f21.mp3",
-    "words/hello/hello-greysanatomy-254f7c88.mp3",
-    "words/hello/hello-greysanatomy-303d1258.mp3",
-    "words/hello/hello-greysanatomy-3ed51e8d.mp3",
-    "words/hello/hello-greysanatomy-44eb7290.mp3",
-    "words/hello/hello-greysanatomy-48143b19.mp3",
-    "words/hello/hello-greysanatomy-4c06f90b.mp3",
-    "words/hello/hello-greysanatomy-56459515.mp3",
-    "words/hello/hello-greysanatomy-6846002d.mp3",
-    "words/hello/hello-greysanatomy-8e49d5f3.mp3",
-    "words/hello/hello-greysanatomy-980efe54.mp3",
-    "words/hello/hello-greysanatomy-9eb91711.mp3",
-    "words/hello/hello-greysanatomy-bbcea5bd.mp3",
-    "words/hello/hello-greysanatomy-c06c325d.mp3",
-    "words/hello/hello-greysanatomy-c8f60452.mp3",
-    "words/hello/hello-greysanatomy-e5790d0f.mp3",
-    "words/hello/hello-greysanatomy-f2155a28.mp3",
-    "words/hello/hello-icarealot-c3b31af8.mp3",
-    "words/hello/hello-ozark-0e09f587.mp3",
-    "words/hello/hello-ozark-133714e9.mp3",
-    "words/hello/hello-ozark-311962f3.mp3",
-    "words/hello/hello-ozark-4a9acb3e.mp3",
-    "words/hello/hello-ozark-5f35f799.mp3",
-    "words/hello/hello-ozark-65644613.mp3",
-    "words/hello/hello-ozark-6b62f05e.mp3",
-    "words/hello/hello-ozark-70116c9c.mp3",
-    "words/hello/hello-ozark-7797bfc9.mp3",
-    "words/hello/hello-ozark-845ad503.mp3",
-    "words/hello/hello-ozark-8731edb0.mp3",
-    "words/hello/hello-ozark-8c5f3ffd.mp3",
-    "words/hello/hello-ozark-96821365.mp3",
-    "words/hello/hello-ozark-bd44b9e1.mp3",
-    "words/hello/hello-ozark-db4b30ce.mp3",
-    "words/hello/hello-ozark-f3508596.mp3",
-    "words/hello/hello-pamtommy-05388564.mp3",
-    "words/hello/hello-pamtommy-13a9e25d.mp3",
-    "words/hello/hello-pamtommy-29833a4e.mp3",
-    "words/hello/hello-pamtommy-410b4a39.mp3",
-    "words/hello/hello-pamtommy-642e3c67.mp3",
-    "words/hello/hello-pamtommy-791b0ebb.mp3",
-    "words/hello/hello-pamtommy-9ad7b396.mp3",
-    "words/hello/hello-pamtommy-c0d8c083.mp3",
-    "words/hello/hello-that70sshow-1b54df08.mp3",
-    "words/hello/hello-that70sshow-4dc732e7.mp3",
-    "words/hello/hello-that70sshow-76024c83.mp3",
-    "words/hello/hello-that70sshow-768a0ca0.mp3",
-    "words/hello/hello-that70sshow-a77b9358.mp3",
-    "words/hello/hello-that70sshow-c3c0977f.mp3",
-    "words/hello/hello-theoffice-083c96f3.mp3",
-    "words/hello/hello-theoffice-0e781f28.mp3",
-    "words/hello/hello-theoffice-145b3c25.mp3",
-    "words/hello/hello-theoffice-1b91a235.mp3",
-    "words/hello/hello-theoffice-27cdbef4.mp3",
-    "words/hello/hello-theoffice-58480923.mp3",
-    "words/hello/hello-theoffice-611ff2fb.mp3",
-    "words/hello/hello-theoffice-651793a5.mp3",
-    "words/hello/hello-theoffice-66ba5bec.mp3",
-    "words/hello/hello-theoffice-88a08a7f.mp3",
-    "words/hello/hello-theoffice-d1695e59.mp3",
-    "words/hello/hello-theoffice-fb2f377c.mp3",
-    "words/hello/hello-theoffice-fb47ab24.mp3",
-    "words/hello/hello-youngsheldon-1b4b7041.mp3",
-    "words/hello/hello-youngsheldon-dd306da3.mp3",
-    "words/hello/hello-youngsheldon-e89db891.mp3"
+    "words/hello/hello_after-yang_movie_56486619.mp3",
+    "words/hello/hello_better-call-saul_s01e03_602a5931.mp3",
+    "words/hello/hello_better-call-saul_s01e03_6e5532d9.mp3",
+    "words/hello/hello_better-call-saul_s01e03_8ff0450a.mp3",
+    "words/hello/hello_greys-anatomy_s03e01_48143b19.mp3",
+    "words/hello/hello_greys-anatomy_s03e01_9eb91711.mp3",
+    "words/hello/hello_greys-anatomy_s03e11_254f7c88.mp3",
+    "words/hello/hello_greys-anatomy_s03e11_4c06f90b.mp3",
+    "words/hello/hello_greys-anatomy_s03e22_1ebc301b.mp3",
+    "words/hello/hello_greys-anatomy_s03e22_bbcea5bd.mp3",
+    "words/hello/hello_greys-anatomy_s03e23_1872bb50.mp3",
+    "words/hello/hello_greys-anatomy_s03e23_303d1258.mp3",
+    "words/hello/hello_greys-anatomy_s03e23_56459515.mp3",
+    "words/hello/hello_greys-anatomy_s03e23_e5790d0f.mp3",
+    "words/hello/hello_greys-anatomy_s03e23_f2155a28.mp3",
+    "words/hello/hello_greys-anatomy_s04e02_44eb7290.mp3",
+    "words/hello/hello_greys-anatomy_s04e02_c06c325d.mp3",
+    "words/hello/hello_greys-anatomy_s04e08_22d92f21.mp3",
+    "words/hello/hello_greys-anatomy_s04e16_8e49d5f3.mp3",
+    "words/hello/hello_greys-anatomy_s04e16_980efe54.mp3",
+    "words/hello/hello_greys-anatomy_s05e02_17b2359b.mp3",
+    "words/hello/hello_greys-anatomy_s05e03_3ed51e8d.mp3",
+    "words/hello/hello_greys-anatomy_s05e03_6846002d.mp3",
+    "words/hello/hello_greys-anatomy_s05e03_c8f60452.mp3",
+    "words/hello/hello_i-care-a-lot_movie_c3b31af8.mp3",
+    "words/hello/hello_ozark_s01e02_70116c9c.mp3",
+    "words/hello/hello_ozark_s01e03_0e09f587.mp3",
+    "words/hello/hello_ozark_s01e04_311962f3.mp3",
+    "words/hello/hello_ozark_s01e04_8c5f3ffd.mp3",
+    "words/hello/hello_ozark_s01e08_7797bfc9.mp3",
+    "words/hello/hello_ozark_s02e01_133714e9.mp3",
+    "words/hello/hello_ozark_s02e02_65644613.mp3",
+    "words/hello/hello_ozark_s02e08_bd44b9e1.mp3",
+    "words/hello/hello_ozark_s02e09_8731edb0.mp3",
+    "words/hello/hello_ozark_s02e09_db4b30ce.mp3",
+    "words/hello/hello_ozark_s03e03_96821365.mp3",
+    "words/hello/hello_ozark_s03e04_6b62f05e.mp3",
+    "words/hello/hello_ozark_s03e05_f3508596.mp3",
+    "words/hello/hello_ozark_s03e08_5f35f799.mp3",
+    "words/hello/hello_ozark_s03e10_4a9acb3e.mp3",
+    "words/hello/hello_ozark_s04e02_845ad503.mp3",
+    "words/hello/hello_pam-and-tommy_s01e01_05388564.mp3",
+    "words/hello/hello_pam-and-tommy_s01e01_13a9e25d.mp3",
+    "words/hello/hello_pam-and-tommy_s01e01_791b0ebb.mp3",
+    "words/hello/hello_pam-and-tommy_s01e02_c0d8c083.mp3",
+    "words/hello/hello_pam-and-tommy_s01e06_29833a4e.mp3",
+    "words/hello/hello_pam-and-tommy_s01e07_642e3c67.mp3",
+    "words/hello/hello_pam-and-tommy_s01e07_9ad7b396.mp3",
+    "words/hello/hello_pam-and-tommy_s01e08_410b4a39.mp3",
+    "words/hello/hello_that-70s-show_s07e19_768a0ca0.mp3",
+    "words/hello/hello_that-70s-show_s07e22_4dc732e7.mp3",
+    "words/hello/hello_that-70s-show_s07e25_c3c0977f.mp3",
+    "words/hello/hello_that-70s-show_s08e04_a77b9358.mp3",
+    "words/hello/hello_that-70s-show_s08e17_1b54df08.mp3",
+    "words/hello/hello_that-70s-show_s08e17_76024c83.mp3",
+    "words/hello/hello_the-office_s06e02_0e781f28.mp3",
+    "words/hello/hello_the-office_s06e13_651793a5.mp3",
+    "words/hello/hello_the-office_s06e23_d1695e59.mp3",
+    "words/hello/hello_the-office_s07e05_145b3c25.mp3",
+    "words/hello/hello_the-office_s07e05_611ff2fb.mp3",
+    "words/hello/hello_the-office_s07e09_88a08a7f.mp3",
+    "words/hello/hello_the-office_s07e11_fb47ab24.mp3",
+    "words/hello/hello_the-office_s07e21_083c96f3.mp3",
+    "words/hello/hello_the-office_s07e24_58480923.mp3",
+    "words/hello/hello_the-office_s08e02_fb2f377c.mp3",
+    "words/hello/hello_the-office_s08e05_66ba5bec.mp3",
+    "words/hello/hello_the-office_s08e18_1b91a235.mp3",
+    "words/hello/hello_the-office_s08e18_27cdbef4.mp3",
+    "words/hello/hello_young-sheldon_s02e17_dd306da3.mp3",
+    "words/hello/hello_young-sheldon_s02e22_1b4b7041.mp3",
+    "words/hello/hello_young-sheldon_s02e22_e89db891.mp3"
   ],
   "helloall": [
-    "supercuts/helloall.mp3"
+    "supercuts/hello_supercut_all-shows.mp3"
+  ],
+  "heyyoudontknowme": [
+    "yarn/hey-you-dont-know-me_rick-and-morty_s01e02_e34bc405.mp3"
+  ],
+  "heyyoudontknowmeidontknowyou": [
+    "combos/hey-you-dont-know-me_rick-and-morty_s01e02_e34bc405+i-dont-know-you_king-of-the-hill_s06e01_c49aa12f.mp3"
+  ],
+  "idontknowyou": [
+    "yarn/i-dont-know-you_king-of-the-hill_s06e01_c49aa12f.mp3"
+  ],
+  "passthebutter": [
+    "yarn/pass-the-butter_rick-and-morty_s01e09_30bead35.mp3"
+  ],
+  "purse": [
+    "yarn/thats-my-purse-i-dont-know-you_king-of-the-hill_s06e01_88a45943.mp3"
+  ],
+  "shutupgivemeyourpurse": [
+    "yarn/shut-up-and-give-me-your-purse_king-of-the-hill_s06e01_4bc2a3f1.mp3"
+  ],
+  "thatsmypurseidontknowyou": [
+    "yarn/thats-my-purse-i-dont-know-you_king-of-the-hill_s06e01_c49aa12f.mp3"
+  ],
+  "yeahyoudontknowme": [
+    "yarn/yeah-you-dont-know-me_rick-and-morty_s06e08_e8c62fa7.mp3"
+  ],
+  "youdontknowmeall": [
+    "supercuts/you-dont-know-me_supercut_rick-and-morty.mp3"
+  ],
+  "youdontknowmecalm": [
+    "yarn/you-dont-know-me_rick-and-morty_s01e02_781fbfb6.mp3"
+  ],
+  "youpassbutter": [
+    "yarn/you-pass-butter_rick-and-morty_s01e09_6c0b7dd8.mp3"
   ]
 }
