@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Strudel Samples Board</title>
+<style>
+:root {
+  --paper: #f5f2ea;
+  --card: #fffdf8;
+  --ink: #1c1e24;
+  --ink2: #5d6270;
+  --line: #d9d3c4;
+  --blue: #1f5fd1;
+  --blue-soft: #e3ecfb;
+  --red: #d6334f;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --sans: "Futura", "Avenir Next Condensed", "Trebuchet MS", sans-serif;
+  --top: 58px;
+  --bottom: 34px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  background: var(--paper);
+  background-image: radial-gradient(rgba(31,95,209,.06) 1px, transparent 1px);
+  background-size: 14px 14px;
+  color: var(--ink);
+  font-family: var(--sans);
+  overflow: hidden;
+}
+
+/* fixed top bar: nothing in it ever moves */
+#top {
+  position: fixed; top: 0; left: 0; right: 0; height: var(--top);
+  display: grid; grid-template-columns: 48px 1fr 84px 76px; align-items: center; gap: 8px;
+  padding: 0 10px;
+  background: var(--card); border-bottom: 2px solid var(--ink);
+  z-index: 50;
+}
+#burger {
+  width: 44px; height: 40px; border: 2px solid var(--ink); border-radius: 6px; background: var(--card);
+  display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer;
+}
+#burger span { width: 20px; height: 2px; background: var(--ink); display: block; }
+.title { font-weight: 800; letter-spacing: 2px; font-size: 15px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.title b { color: var(--blue); }
+.tbtn {
+  height: 40px; border-radius: 6px; border: 2px solid var(--ink); background: var(--card);
+  font-family: var(--sans); font-weight: 800; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; color: var(--ink);
+}
+.tbtn.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+.tbtn.stop { border-color: var(--red); color: var(--red); }
+
+/* board */
+#board {
+  position: fixed; top: var(--top); bottom: var(--bottom); left: 0; right: 0;
+  overflow-y: auto; padding: 12px 12px 40px;
+}
+#grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.empty { grid-column: 1 / -1; text-align: center; color: var(--ink2); padding: 60px 20px; line-height: 1.6; font-size: 15px; }
+.empty b { color: var(--blue); }
+
+.pad {
+  position: relative; height: 128px; border-radius: 8px; border: 2px solid var(--ink);
+  background: var(--card); box-shadow: 3px 3px 0 var(--ink); cursor: pointer; overflow: hidden;
+  display: grid; grid-template-rows: 18px 1fr 16px 22px; padding: 8px 9px 6px; gap: 2px;
+  user-select: none; transition: transform .06s, box-shadow .06s;
+}
+.pad::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--pc); }
+.pad:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
+.pad.playing { background: color-mix(in srgb, var(--pc) 18%, var(--card)); }
+.pad .row1 { display: flex; justify-content: space-between; align-items: center; padding-left: 4px; }
+.pad .key { font-family: var(--mono); font-size: 10px; color: var(--ink2); }
+.pad .link { font-family: var(--mono); font-size: 10px; color: var(--blue); font-weight: 700; visibility: hidden; }
+.pad.chainlink .link { visibility: visible; }
+.pad .name { font-weight: 800; font-size: 14px; line-height: 1.15; padding-left: 4px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.pad .meta { font-family: var(--mono); font-size: 10px; color: var(--ink2); padding-left: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pad .ctrl { display: grid; grid-template-columns: 1fr 26px; gap: 6px; align-items: center; padding-left: 4px; }
+.pad .edit { width: 26px; height: 22px; border-radius: 4px; border: 1.5px solid var(--ink); background: var(--card); font-size: 12px; cursor: pointer; }
+.pad .bar { position: absolute; left: 0; bottom: 0; height: 4px; width: 0; background: var(--blue); }
+
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; background: var(--line); border-radius: 2px; outline: none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--blue); border: 2px solid var(--card); box-shadow: 0 0 0 1.5px var(--ink); }
+
+/* status strip */
+#status {
+  position: fixed; left: 0; right: 0; bottom: 0; height: var(--bottom);
+  display: flex; align-items: center; gap: 8px; padding: 0 12px;
+  background: var(--ink); color: #e9ecf3; font-family: var(--mono); font-size: 11px;
+}
+#dot { width: 8px; height: 8px; border-radius: 50%; background: #6a7080; flex-shrink: 0; }
+#dot.on { background: #5b9bff; box-shadow: 0 0 8px #5b9bff; }
+#stext { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* menu overlay, upper left, covers the left side only */
+#scrim { position: fixed; inset: 0; background: rgba(28,30,36,.25); z-index: 80; display: none; }
+#scrim.open { display: block; }
+#menu {
+  position: fixed; top: 0; bottom: 0; left: 0; width: min(86vw, 380px);
+  background: var(--card); border-right: 2px solid var(--ink); z-index: 90;
+  transform: translateX(-102%); transition: transform .18s ease-out;
+  display: flex; flex-direction: column;
+}
+#menu.open { transform: translateX(0); }
+.mhead { height: var(--top); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-bottom: 2px solid var(--ink); flex-shrink: 0; }
+.mhead .title { font-size: 14px; }
+.mclose { width: 40px; height: 40px; border: 2px solid var(--ink); border-radius: 6px; background: var(--card); font-size: 18px; cursor: pointer; }
+.mbody { flex: 1; overflow-y: auto; padding: 10px 12px 30px; }
+details { border: 2px solid var(--ink); border-radius: 8px; margin-bottom: 10px; background: var(--card); }
+summary { list-style: none; padding: 11px 12px; font-weight: 800; letter-spacing: 2px; font-size: 13px; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; color: var(--blue); }
+details[open] summary::after { content: "-"; }
+details[open] summary { border-bottom: 1.5px dashed var(--line); }
+.dbody { padding: 10px 12px 12px; }
+.search { width: 100%; height: 38px; border: 2px solid var(--ink); border-radius: 6px; padding: 0 10px; font-family: var(--mono); font-size: 13px; background: var(--paper); outline: none; }
+.search:focus { border-color: var(--blue); }
+.group { margin-top: 12px; }
+.ghead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.gname { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 1px; }
+.sbtn { height: 26px; padding: 0 9px; border-radius: 5px; border: 1.5px solid var(--ink); background: var(--card); font-family: var(--sans); font-weight: 800; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
+.sbtn.blue { background: var(--blue); border-color: var(--blue); color: #fff; }
+.clip { display: grid; grid-template-columns: 30px 1fr 30px; gap: 8px; align-items: center; padding: 5px 0; border-top: 1px solid var(--line); }
+.clip .cname { font-size: 13px; font-weight: 600; line-height: 1.2; }
+.clip .cmeta { font-family: var(--mono); font-size: 10px; color: var(--ink2); }
+.ibtn { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--ink); background: var(--card); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.ibtn.add { border-radius: 6px; color: var(--blue); border-color: var(--blue); font-size: 17px; font-weight: 800; }
+.ibtn.on { background: var(--blue); color: #fff; border-color: var(--blue); }
+.field { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink2); margin: 12px 0 6px; }
+.field:first-child { margin-top: 0; }
+.vrow { display: grid; grid-template-columns: 1fr 44px; gap: 10px; align-items: center; font-family: var(--mono); font-size: 12px; }
+.wide { width: 100%; height: 38px; margin-top: 8px; }
+
+/* edit sheet */
+#sheet-scrim { position: fixed; inset: 0; background: rgba(28,30,36,.35); z-index: 120; display: none; align-items: flex-end; justify-content: center; }
+#sheet-scrim.open { display: flex; }
+#sheet { width: min(100vw, 520px); max-height: 92vh; overflow-y: auto; background: var(--card); border: 2px solid var(--ink); border-bottom: none; border-radius: 12px 12px 0 0; padding: 14px 14px 22px; }
+#sheet h3 { font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; color: var(--blue); }
+#sheet input[type=text], #sheet input[type=number] { width: 100%; height: 38px; border: 2px solid var(--ink); border-radius: 6px; padding: 0 10px; font-family: var(--sans); font-size: 15px; background: var(--paper); outline: none; }
+#sheet input:focus { border-color: var(--blue); }
+#wave { position: relative; height: 84px; border: 2px solid var(--ink); border-radius: 6px; background: var(--paper); overflow: hidden; touch-action: none; cursor: crosshair; }
+#wave canvas { width: 100%; height: 100%; display: block; }
+#wcur { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1px; background: var(--blue); pointer-events: none; }
+#wdur { position: absolute; right: 6px; bottom: 4px; font-family: var(--mono); font-size: 10px; color: var(--ink2); pointer-events: none; }
+.srow { display: grid; grid-template-columns: 52px 1fr 52px; gap: 8px; margin-top: 8px; }
+.srow input { text-align: center; font-family: var(--mono) !important; }
+.nudge { height: 38px; border-radius: 6px; border: 2px solid var(--ink); background: var(--card); font-family: var(--mono); font-weight: 700; font-size: 12px; cursor: pointer; }
+.colors { display: flex; gap: 10px; flex-wrap: wrap; }
+.sw { width: 34px; height: 34px; border-radius: 6px; border: 2px solid var(--ink); cursor: pointer; }
+.sw.sel { box-shadow: 0 0 0 3px var(--card), 0 0 0 5px var(--blue); }
+.check { display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 12px; border: 2px solid var(--ink); border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 14px; }
+.check input { width: 18px; height: 18px; accent-color: var(--blue); }
+.actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 16px; }
+.actions button { height: 42px; }
+</style>
+</head>
+<body>
+
+<div id="top">
+  <button id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+  <div class="title">Sample <b>Board</b></div>
+  <button class="tbtn" id="chainBtn">Chain</button>
+  <button class="tbtn stop" id="stopBtn">Stop</button>
+</div>
+
+<div id="board"><div id="grid"></div></div>
+
+<div id="status"><div id="dot"></div><span id="stext">Loading the sample map</span></div>
+
+<div id="scrim"></div>
+<div id="menu">
+  <div class="mhead">
+    <div class="title">Strudel <b>Samples</b></div>
+    <button class="mclose" id="menuClose" aria-label="Close">&times;</button>
+  </div>
+  <div class="mbody">
+    <details open>
+      <summary>Library</summary>
+      <div class="dbody">
+        <input class="search" id="search" type="text" placeholder="search words or shows" autocomplete="off">
+        <div id="lib"></div>
+      </div>
+    </details>
+    <details>
+      <summary>Board</summary>
+      <div class="dbody">
+        <span class="field">Master volume</span>
+        <div class="vrow"><input type="range" id="master" min="0" max="100" value="85"><span id="masterVal">85</span></div>
+        <span class="field">Chain mode</span>
+        <label class="check"><input type="checkbox" id="chainAll"> Every pad triggers the next one</label>
+        <span class="field">Clear</span>
+        <button class="tbtn stop wide" id="clearBtn">Clear all pads</button>
+      </div>
+    </details>
+  </div>
+</div>
+
+<div id="sheet-scrim">
+  <div id="sheet">
+    <h3>Edit pad</h3>
+    <span class="field">Name</span>
+    <input type="text" id="eName">
+    <span class="field">Start point, drag the waveform</span>
+    <div id="wave"><canvas id="wcan"></canvas><div id="wcur"></div><div id="wdur"></div></div>
+    <div class="srow">
+      <button class="nudge" id="nudgeDown">-0.05</button>
+      <input type="number" id="eStart" step="0.01" min="0" inputmode="decimal">
+      <button class="nudge" id="nudgeUp">+0.05</button>
+    </div>
+    <span class="field">Color</span>
+    <div class="colors" id="eColors"></div>
+    <span class="field">Chain</span>
+    <label class="check"><input type="checkbox" id="eChain"> When this pad ends, play the next pad</label>
+    <div class="actions">
+      <button class="tbtn stop" id="eDelete">Delete</button>
+      <button class="tbtn" id="ePreview">Preview</button>
+      <button class="tbtn on" id="eDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var STORE = 'strudel-samples-v1-board';
+var COLORS = ['#1f5fd1', '#d6334f', '#e8a317', '#2a9d5c', '#7b4fd6', '#14a3b8'];
+var KEYS = '1234567890QWERTYUIOP'.split('');
+
+var catalog = {};   // path -> {words, show, episode, quote}
+var library = [];   // {group, path}
+var pads = [];      // {id, path, name, startSec, volume, color, chained}
+var chainAll = false;
+var masterVol = 85;
+var buffers = {};   // path -> AudioBuffer
+var active = {};    // padId -> handle
+var ac = null, master = null;
+var previewHandle = null;
+var editing = null;
+
+function $(id) { return document.getElementById(id); }
+
+/* ---------- audio ---------- */
+function ctx() {
+  if (!ac) {
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    master = ac.createGain();
+    master.gain.value = masterVol / 100;
+    master.connect(ac.destination);
+  }
+  if (ac.state === 'suspended') ac.resume();
+  return ac;
+}
+
+function getBuffer(path) {
+  if (buffers[path]) return Promise.resolve(buffers[path]);
+  return fetch(path).then(function (r) {
+    if (!r.ok) throw new Error('missing ' + path);
+    return r.arrayBuffer();
+  }).then(function (ab) {
+    return ctx().decodeAudioData(ab);
+  }).then(function (buf) {
+    buffers[path] = buf;
+    return buf;
+  });
+}
+
+function startBuffer(buf, startSec, volume, onEnd) {
+  var c = ctx();
+  var src = c.createBufferSource();
+  src.buffer = buf;
+  var g = c.createGain();
+  g.gain.value = volume / 100;
+  src.connect(g); g.connect(master);
+  var off = Math.max(0, Math.min(startSec || 0, buf.duration - 0.01));
+  var h = { src: src, gain: g, t0: c.currentTime, len: buf.duration - off, cut: false };
+  src.onended = function () { onEnd && onEnd(h); };
+  src.start(0, off);
+  return h;
+}
+
+function cut(h) {
+  if (!h) return;
+  h.cut = true;
+  try { h.src.stop(); } catch (e) {}
+}
+
+/* ---------- pads ---------- */
+function playPad(id) {
+  var pad = findPad(id);
+  if (!pad) return;
+  if (active[id]) { cut(active[id]); delete active[id]; paint(); status('Ready', false); return; }
+  status('Loading ' + pad.name, true);
+  getBuffer(pad.path).then(function (buf) {
+    var h = startBuffer(buf, pad.startSec, pad.volume, function (hh) {
+      if (active[id] === hh) delete active[id];
+      paintPad(id);
+      if (hh.cut) return;
+      var i = indexOf(id);
+      if ((chainAll || pad.chained) && i > -1 && i < pads.length - 1) {
+        playPad(pads[i + 1].id);
+      } else if (!anyActive()) {
+        status('Ready', false);
+      }
+    });
+    active[id] = h;
+    paintPad(id);
+    status('Playing ' + pad.name, true);
+    tick(id, h);
+  }).catch(function (e) { status('Could not load ' + pad.name, false); });
+}
+
+function tick(id, h) {
+  function frame() {
+    var el = document.querySelector('[data-id="' + id + '"] .bar');
+    if (!el) return;
+    if (active[id] !== h) { el.style.width = '0'; return; }
+    var pct = Math.min(100, ((ac.currentTime - h.t0) / h.len) * 100);
+    el.style.width = pct + '%';
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+function stopAll() {
+  Object.keys(active).forEach(function (k) { cut(active[k]); delete active[k]; });
+  cut(previewHandle); previewHandle = null;
+  paint();
+  status('Ready', false);
+}
+
+function anyActive() { return Object.keys(active).length > 0; }
+function findPad(id) { for (var i = 0; i < pads.length; i++) if (pads[i].id === id) return pads[i]; return null; }
+function indexOf(id) { for (var i = 0; i < pads.length; i++) if (pads[i].id === id) return i; return -1; }
+
+function addPad(path) {
+  var info = catalog[path] || parseName(path);
+  pads.push({
+    id: 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    path: path,
+    name: info.label,
+    startSec: 0,
+    volume: 85,
+    color: COLORS[pads.length % COLORS.length],
+    chained: false
+  });
+  save(); paint();
+  status('Added ' + info.label, false);
+}
+
+function paint() {
+  var grid = $('grid');
+  $('chainBtn').classList.toggle('on', chainAll);
+  $('chainAll').checked = chainAll;
+  if (!pads.length) {
+    grid.innerHTML = '<div class="empty">Open the menu in the upper left,<br>pick clips from the <b>Library</b>,<br>then tap a pad to play it.</div>';
+    return;
+  }
+  grid.innerHTML = pads.map(function (p, i) {
+    var link = (chainAll || p.chained) && i < pads.length - 1;
+    return '<div class="pad' + (active[p.id] ? ' playing' : '') + (link ? ' chainlink' : '') + '" data-id="' + p.id + '" style="--pc:' + p.color + '">' +
+      '<div class="row1"><span class="key">' + (KEYS[i] || '') + '</span><span class="link">CHAIN &gt;</span></div>' +
+      '<div class="name">' + esc(p.name) + '</div>' +
+      '<div class="meta">start ' + p.startSec.toFixed(2) + 's</div>' +
+      '<div class="ctrl"><input type="range" min="0" max="100" value="' + p.volume + '" data-vol="' + p.id + '"><button class="edit" data-edit="' + p.id + '">&#9998;</button></div>' +
+      '<div class="bar"></div></div>';
+  }).join('');
+}
+
+function paintPad(id) {
+  var el = document.querySelector('[data-id="' + id + '"]');
+  if (el) el.classList.toggle('playing', !!active[id]);
+}
+
+$('grid').addEventListener('click', function (e) {
+  if (e.target.closest('input')) return;
+  var ed = e.target.closest('[data-edit]');
+  if (ed) { openSheet(ed.getAttribute('data-edit')); return; }
+  var pad = e.target.closest('.pad');
+  if (pad) playPad(pad.getAttribute('data-id'));
+});
+$('grid').addEventListener('input', function (e) {
+  var id = e.target.getAttribute('data-vol');
+  if (!id) return;
+  var p = findPad(id);
+  p.volume = +e.target.value;
+  if (active[id]) active[id].gain.gain.value = p.volume / 100;
+  save();
+});
+
+/* ---------- library ---------- */
+function parseName(path) {
+  var file = path.split('/').pop().replace(/\.mp3$/i, '');
+  var parts = file.split('_');
+  var words = (parts[0] || '').replace(/-/g, ' ');
+  var show = (parts[1] || '').replace(/-/g, ' ');
+  var ep = parts[2] && parts[2] !== 'movie' && parts[2] !== 'supercut' ? parts[2] : '';
+  return { words: words, show: show, episode: ep, label: words + ' / ' + show + (ep ? ' ' + ep : '') };
+}
+
+function parseCSV(text) {
+  var rows = [], row = [], f = '', q = false;
+  for (var i = 0; i < text.length; i++) {
+    var ch = text[i];
+    if (q) {
+      if (ch === '"' && text[i + 1] === '"') { f += '"'; i++; }
+      else if (ch === '"') q = false;
+      else f += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === ',') { row.push(f); f = ''; }
+    else if (ch === '\n') { row.push(f); rows.push(row); row = []; f = ''; }
+    else if (ch !== '\r') f += ch;
+  }
+  if (f || row.length) { row.push(f); rows.push(row); }
+  return rows;
+}
+
+function renderLib() {
+  var q = $('search').value.trim().toLowerCase();
+  var groups = {};
+  library.forEach(function (item) {
+    var info = catalog[item.path] || parseName(item.path);
+    var hay = (item.group + ' ' + info.label + ' ' + (info.quote || '')).toLowerCase();
+    if (q && hay.indexOf(q) < 0) return;
+    (groups[item.group] = groups[item.group] || []).push({ path: item.path, info: info });
+  });
+  var html = Object.keys(groups).map(function (g) {
+    var items = groups[g];
+    return '<div class="group"><div class="ghead"><span class="gname">' + esc(g) + '</span>' +
+      (items.length > 1 ? '<button class="sbtn blue" data-addall="' + esc(g) + '">Add all</button>' : '') + '</div>' +
+      items.map(function (it) {
+        return '<div class="clip"><button class="ibtn" data-prev="' + esc(it.path) + '">&#9654;</button>' +
+          '<div><div class="cname">' + esc(it.info.quote || it.info.words) + '</div><div class="cmeta">' + esc(it.info.show + (it.info.episode ? ' ' + it.info.episode : '')) + '</div></div>' +
+          '<button class="ibtn add" data-add="' + esc(it.path) + '">+</button></div>';
+      }).join('') + '</div>';
+  }).join('');
+  $('lib').innerHTML = html || '<p class="cmeta" style="padding:14px 0">Nothing matches that search.</p>';
+}
+
+$('search').addEventListener('input', renderLib);
+$('lib').addEventListener('click', function (e) {
+  var b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.add) addPad(b.dataset.add);
+  else if (b.dataset.addall) {
+    var q = $('search').value.trim().toLowerCase();
+    library.forEach(function (it) {
+      if (it.group !== b.dataset.addall) return;
+      var info = catalog[it.path] || parseName(it.path);
+      if (q && (it.group + ' ' + info.label + ' ' + (info.quote || '')).toLowerCase().indexOf(q) < 0) return;
+      addPad(it.path);
+    });
+  } else if (b.dataset.prev) {
+    var was = b.classList.contains('on');
+    cut(previewHandle); previewHandle = null;
+    document.querySelectorAll('.ibtn.on').forEach(function (x) { x.classList.remove('on'); });
+    if (was) return;
+    b.classList.add('on');
+    getBuffer(b.dataset.prev).then(function (buf) {
+      previewHandle = startBuffer(buf, 0, 85, function () { b.classList.remove('on'); });
+    }).catch(function () { b.classList.remove('on'); status('Could not load that clip', false); });
+  }
+});
+
+/* ---------- menu ---------- */
+function menu(open) {
+  $('menu').classList.toggle('open', open);
+  $('scrim').classList.toggle('open', open);
+}
+$('burger').onclick = function () { menu(true); };
+$('menuClose').onclick = function () { menu(false); };
+$('scrim').onclick = function () { menu(false); };
+
+$('master').oninput = function () {
+  masterVol = +this.value;
+  $('masterVal').textContent = this.value;
+  if (master) master.gain.value = masterVol / 100;
+  save();
+};
+function setChain(v) { chainAll = v; save(); paint(); }
+$('chainBtn').onclick = function () { setChain(!chainAll); };
+$('chainAll').onchange = function () { setChain(this.checked); };
+$('stopBtn').onclick = stopAll;
+$('clearBtn').onclick = function () {
+  if (!pads.length || !confirm('Clear every pad off the board?')) return;
+  stopAll(); pads = []; save(); paint(); menu(false);
+};
+
+/* ---------- edit sheet ---------- */
+function openSheet(id) {
+  var p = findPad(id);
+  if (!p) return;
+  editing = p;
+  $('eName').value = p.name;
+  $('eStart').value = p.startSec.toFixed(2);
+  $('eChain').checked = !!p.chained;
+  $('eColors').innerHTML = COLORS.map(function (c) {
+    return '<div class="sw' + (c === p.color ? ' sel' : '') + '" data-c="' + c + '" style="background:' + c + '"></div>';
+  }).join('');
+  $('sheet-scrim').classList.add('open');
+  $('wdur').textContent = 'loading';
+  drawWave();
+  getBuffer(p.path).then(function (buf) {
+    if (editing !== p) return;
+    $('wdur').textContent = buf.duration.toFixed(2) + 's';
+    drawWave();
+  }).catch(function () { $('wdur').textContent = 'could not load'; });
+}
+
+function closeSheet() {
+  cut(previewHandle); previewHandle = null;
+  $('sheet-scrim').classList.remove('open');
+  editing = null;
+  save(); paint();
+}
+
+function drawWave() {
+  var cv = $('wcan');
+  var W = cv.width = cv.offsetWidth * (window.devicePixelRatio || 1);
+  var H = cv.height = cv.offsetHeight * (window.devicePixelRatio || 1);
+  var g = cv.getContext('2d');
+  g.clearRect(0, 0, W, H);
+  var buf = editing && buffers[editing.path];
+  if (!buf) { $('wcur').style.left = '0%'; return; }
+  var data = buf.getChannelData(0);
+  var step = Math.max(1, Math.floor(data.length / W));
+  var mid = H / 2;
+  var sx = (editing.startSec / buf.duration) * W;
+  for (var x = 0; x < W; x++) {
+    var m = 0;
+    for (var j = 0; j < step; j++) { var v = Math.abs(data[x * step + j] || 0); if (v > m) m = v; }
+    var h = Math.max(1, m * mid * 0.92);
+    g.fillStyle = x < sx ? 'rgba(28,30,36,0.14)' : editing.color;
+    g.fillRect(x, mid - h, 1, h * 2);
+  }
+  $('wcur').style.left = (editing.startSec / buf.duration * 100) + '%';
+}
+
+function setStart(sec) {
+  if (!editing) return;
+  var buf = buffers[editing.path];
+  var max = buf ? buf.duration - 0.01 : 9999;
+  editing.startSec = Math.max(0, Math.min(Math.round(sec * 100) / 100, max));
+  $('eStart').value = editing.startSec.toFixed(2);
+  drawWave();
+}
+
+(function () {
+  var wave = $('wave'), down = false;
+  function at(e) {
+    var buf = editing && buffers[editing.path];
+    if (!buf) return;
+    var r = wave.getBoundingClientRect();
+    var ratio = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    setStart(ratio * buf.duration);
+  }
+  wave.addEventListener('pointerdown', function (e) { down = true; wave.setPointerCapture(e.pointerId); at(e); });
+  wave.addEventListener('pointermove', function (e) { if (down) at(e); });
+  wave.addEventListener('pointerup', function () { down = false; });
+  wave.addEventListener('pointercancel', function () { down = false; });
+})();
+
+$('eStart').addEventListener('input', function () { setStart(parseFloat(this.value) || 0); });
+$('nudgeDown').onclick = function () { if (editing) setStart(editing.startSec - 0.05); };
+$('nudgeUp').onclick = function () { if (editing) setStart(editing.startSec + 0.05); };
+$('eName').addEventListener('input', function () { if (editing) editing.name = this.value.trim() || editing.name; });
+$('eChain').onchange = function () { if (editing) editing.chained = this.checked; };
+$('eColors').addEventListener('click', function (e) {
+  var sw = e.target.closest('.sw');
+  if (!sw || !editing) return;
+  editing.color = sw.dataset.c;
+  document.querySelectorAll('.sw').forEach(function (x) { x.classList.toggle('sel', x === sw); });
+  drawWave();
+});
+$('ePreview').onclick = function () {
+  if (!editing) return;
+  cut(previewHandle);
+  var p = editing;
+  getBuffer(p.path).then(function (buf) { previewHandle = startBuffer(buf, p.startSec, p.volume); });
+};
+$('eDelete').onclick = function () {
+  if (!editing) return;
+  var id = editing.id;
+  cut(active[id]); delete active[id];
+  pads = pads.filter(function (p) { return p.id !== id; });
+  closeSheet();
+};
+$('eDone').onclick = closeSheet;
+$('sheet-scrim').addEventListener('click', function (e) { if (e.target === this) closeSheet(); });
+
+/* ---------- keys ---------- */
+document.addEventListener('keydown', function (e) {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'Escape') { closeSheet(); menu(false); return; }
+  if (e.key === ' ') { e.preventDefault(); stopAll(); return; }
+  var i = KEYS.indexOf(e.key.toUpperCase());
+  if (i > -1 && pads[i]) playPad(pads[i].id);
+});
+
+/* ---------- save / load ---------- */
+function save() {
+  try { localStorage.setItem(STORE, JSON.stringify({ pads: pads, chainAll: chainAll, masterVol: masterVol })); } catch (e) {}
+}
+function load() {
+  try {
+    var d = JSON.parse(localStorage.getItem(STORE) || 'null');
+    if (!d) return;
+    pads = d.pads || [];
+    chainAll = !!d.chainAll;
+    masterVol = typeof d.masterVol === 'number' ? d.masterVol : 85;
+    $('master').value = masterVol;
+    $('masterVal').textContent = masterVol;
+  } catch (e) {}
+}
+
+function status(msg, on) { $('stext').textContent = msg; $('dot').classList.toggle('on', !!on); }
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+/* ---------- boot ---------- */
+load();
+paint();
+Promise.all([
+  fetch('strudel.json').then(function (r) { return r.json(); }),
+  fetch('strudel-samples-v1-catalog.csv').then(function (r) { return r.ok ? r.text() : ''; }).catch(function () { return ''; })
+]).then(function (res) {
+  var map = res[0], rows = parseCSV(res[1] || '');
+  if (rows.length > 1) {
+    var head = rows[0];
+    var col = function (n) { return head.indexOf(n); };
+    rows.slice(1).forEach(function (r) {
+      if (!r[col('file')]) return;
+      var words = r[col('words')] || '';
+      var show = r[col('show')] || '';
+      var ep = r[col('episode')] || '';
+      catalog[r[col('file')]] = {
+        words: words, show: show, episode: ep,
+        quote: (r[col('quote')] || '').trim(),
+        label: words + ' / ' + show + (ep ? ' ' + ep : '')
+      };
+    });
+  }
+  Object.keys(map).forEach(function (k) {
+    if (k.charAt(0) === '_') return;
+    (Array.isArray(map[k]) ? map[k] : [map[k]]).forEach(function (p) { library.push({ group: k, path: p }); });
+  });
+  renderLib();
+  status(library.length + ' clips ready', false);
+}).catch(function () { status('Could not load the sample map', false); });
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/strudel-samples-v1-board.html" }
+  ]
+}

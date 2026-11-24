@@ -4,6 +4,6 @@ Strudel Samples is a pack of sound clips for the Strudel live coding music tool.
 
 Load the pack in Strudel with samples followed by github:sudosilo/strudel-samples. A map file lists every clip by name and where to find it. The clips are short spoken lines. Helper scripts pull new clips, and logs record which titles were fetched and which runs worked.
 
-Latest change. 2026-11-10, v2026.11.10. Added a word puller that grabs every short clip of one word. The first pull was the word hello, trimmed tight with misses dropped and a hello supercut added. Every sample is now named by its words, show, episode, and clip id, and a catalog lists them all.
+Latest change. 2026-11-24, v2026.11.24. Added a pad board page that loads every clip from the map. Pick clips from a library menu, set each pad's start point by dragging its waveform or typing seconds, and turn on chain mode so each pad plays the next one when it ends. The board layout saves itself in the browser, and the site root opens the board.
 
 The full history is in CHANGELOG.md.
